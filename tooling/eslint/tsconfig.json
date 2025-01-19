@@ -1,5 +1,9 @@
 {
-  "extends": "@acme/tsconfig/base.json",
-  "include": ["."],
-  "exclude": ["node_modules"]
+  "extends": "@torva/tsconfig/base.json",
+  "include": [
+    "."
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

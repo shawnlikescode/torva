@@ -1,5 +1,5 @@
-import { auth, signIn, signOut } from "@acme/auth";
-import { Button } from "@acme/ui/button";
+import { auth, signIn, signOut } from "@torva/auth";
+import { Button } from "@torva/ui/button";
 
 export async function AuthShowcase() {
   const session = await auth();
@@ -14,7 +14,7 @@ export async function AuthShowcase() {
             await signIn("discord");
           }}
         >
-          Sign in with Discord
+          Sign in with Google
         </Button>
       </form>
     );

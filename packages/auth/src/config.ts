@@ -5,10 +5,10 @@ import type {
 } from "next-auth";
 import { skipCSRFCheck } from "@auth/core";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import Discord from "next-auth/providers/discord";
+import Google from "next-auth/providers/google";
 
-import { db } from "@acme/db/client";
-import { Account, Session, User } from "@acme/db/schema";
+import { db } from "@torva/db/client";
+import { account, session, customer } from "@torva/db/schema";
 
 import { env } from "../env";
 
@@ -21,9 +21,9 @@ declare module "next-auth" {
 }
 
 const adapter = DrizzleAdapter(db, {
-  usersTable: User,
-  accountsTable: Account,
-  sessionsTable: Session,
+  usersTable: customer,
+  accountsTable: account,
+  sessionsTable: session,
 });
 
 export const isSecureContext = env.NODE_ENV !== "development";
@@ -33,16 +33,17 @@ export const authConfig = {
   // In development, we need to skip checks to allow Expo to work
   ...(!isSecureContext
     ? {
-        skipCSRFCheck: skipCSRFCheck,
-        trustHost: true,
-      }
+      skipCSRFCheck: skipCSRFCheck,
+      trustHost: true,
+    }
     : {}),
   secret: env.AUTH_SECRET,
-  providers: [Discord],
+  providers: [Google],
   callbacks: {
     session: (opts) => {
-      if (!("user" in opts))
+      if (!("user" in opts)) {
         throw new Error("unreachable with session strategy");
+      }
 
       return {
         ...opts.session,
@@ -62,11 +63,11 @@ export const validateToken = async (
   const session = await adapter.getSessionAndUser?.(sessionToken);
   return session
     ? {
-        user: {
-          ...session.user,
-        },
-        expires: session.session.expires.toISOString(),
-      }
+      user: {
+        ...session.user,
+      },
+      expires: session.session.expires.toISOString(),
+    }
     : null;
 };
 
