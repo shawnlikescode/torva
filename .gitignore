@@ -30,6 +30,7 @@ build
 # misc
 .DS_Store
 *.pem
+packages/db/.drizzle/visualizer.json
 
 # debug
 npm-debug.log*
