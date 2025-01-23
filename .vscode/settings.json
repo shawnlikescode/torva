@@ -3,5 +3,8 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "python.defaultInterpreterPath": "services/rag-service/venv/bin/python3.11",
+  "git.ignoreLimitWarning": true,
 }
+
