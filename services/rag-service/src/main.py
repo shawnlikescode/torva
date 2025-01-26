@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings
 from contextlib import asynccontextmanager
 from .routes.query import router as query_router
+from .routes.ingest import router as ingest_router, document_processor
 from dotenv import load_dotenv
 import os
 
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown: Clean up resources
     print("Shutting down RAG service...")
+    await document_processor.close()
 
 
 app = FastAPI(
@@ -45,6 +47,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(query_router)
+app.include_router(ingest_router)
 
 
 @app.get("/health")

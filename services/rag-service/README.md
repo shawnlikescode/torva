@@ -1,14 +1,17 @@
 # RAG Service
 
-A FastAPI-based Retrieval Augmented Generation (RAG) service for Torva. This service provides endpoints for document ingestion and intelligent querying using OpenAI's GPT-4 and ChromaDB as the vector store.
+A FastAPI-based Retrieval Augmented Generation (RAG) service for Torva. This service provides endpoints for semantic search and document retrieval using OpenAI and Pinecone as the vector store.
 
 ## Features
 
-- Document ingestion with metadata support
-- Semantic search using OpenAI embedding
-- RAG-powered question answering
-- ChromaDB vector store for efficient similarity search
+- Semantic search using OpenAI's text-embedding-3-small model (configurable)
+- Pinecone vector store integration for efficient similarity search
+- Configurable number of search results
 - FastAPI for high-performance async API endpoints
+- CORS middleware support for cross-origin requests
+- Health check endpoint
+- Structured response models using Pydantic
+- Environment-based configuration
 
 ## Setup
 
@@ -29,21 +32,24 @@ uv pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-# Edit .env with your settings, especially the OPENAI_API_KEY
 ```
 
-4. Create the data directory for ChromaDB:
+Required environment variables:
 
-```bash
-mkdir -p data/chroma
-```
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `OPENAI_MODEL`: OpenAI model to use (optional)
+- `PINECONE_API_KEY`: Your Pinecone API key
+- `PINECONE_ENVIRONMENT`: Pinecone environment
+- `PINECONE_INDEX_NAME`: Name of your Pinecone index (defaults to "knowledgebase")
+- `EMBEDDING_MODEL`: OpenAI embedding model (defaults to "text-embedding-3-small")
+- `BACKEND_CORS_ORIGINS`: Allowed CORS origins (JSON array)
 
 ## Running the Service
 
 Start the development server:
 
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## API Documentation
@@ -57,37 +63,40 @@ Once the service is running, you can access:
 
 ### Health Check
 
-- `GET /` - Service health check
-
-### Documents
-
-- `POST /documents` - Add a document to the RAG system
+- `GET /health` - Service health check
+  - Returns service status and name
 
 ### Queries
 
-- `POST /query` - Query the RAG system with a question
+- `POST /query` - Query the vector store for similar documents
+  - Request body:
+    ```json
+    {
+      "query": "Your search query",
+      "max_results": 3 // Optional, defaults to 3
+    }
+    ```
+  - Returns matching documents with similarity scores
 
 ## Project Structure
 
 ```
-app/
-├── api/           # API route handlers
-├── core/          # Core functionality and config
-├── models/        # Pydantic models
-├── services/      # Business logic
-└── utils/         # Utility functions
+src/
+├── main.py              # FastAPI app initialization and configuration
+├── models/              # Pydantic data models
+├── routes/              # API route handlers
+└── services/            # Business logic
 ```
+
+## Error Handling
+
+The service includes comprehensive error handling for:
+
+- Missing environment variables
+- Vector store initialization failures
+- Query processing errors
+- Invalid requests
 
 ## Development
 
-1. Install development dependencies:
-
-```bash
-uv pip install -r requirements-dev.txt  # Coming soon
-```
-
-2. Run tests:
-
-```bash
-pytest  # Coming soon
-```
+The service is built with modern Python async features and follows FastAPI best practices. Future improvements and features will be documented here.

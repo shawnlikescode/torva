@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from ..models.query import QueryRequest, QueryResponse, Document
+from ..models.query import QueryRequest, QueryResponse, ScoredDocument
+from ..models.document import DocumentMetadata
 from ..services.vector_store import VectorStoreService
 
 
@@ -22,9 +23,31 @@ def get_vector_store_service():
 async def query_documents(
     request: QueryRequest,
     vector_store: VectorStoreService = Depends(get_vector_store_service)
-):
-    
-    return QueryResponse(
-        matches=[],
-        query=request.query
-    )
+) -> QueryResponse:
+    try:
+        results = await vector_store.similarity_search(
+            request.query,
+            k=request.max_results
+        )
+        
+        matches = []
+        for doc, score in results:
+            # Convert the metadata dict back to our DocumentMetadata model
+            metadata = DocumentMetadata(**doc.metadata)
+            matches.append(
+                ScoredDocument(
+                    content=doc.page_content,
+                    metadata=metadata,
+                    score=score
+                )
+            )
+        
+        return QueryResponse(
+            matches=matches,
+            query=request.query
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Query failed: {str(e)}"
+        )
