@@ -11,10 +11,10 @@ class DocumentType(str, Enum):
 
 class DocumentMetadata(BaseModel):
     source: str
-    author: Optional[str] = None
-    created_at: Optional[str] = None
+    author: str
+    created_at: str
     document_type: DocumentType
-    page_number: Optional[int] = None
+    page_number: int
 
 
 class Document(BaseModel):

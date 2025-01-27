@@ -18,13 +18,11 @@ class TextIngestRequest(BaseModel):
 class FileUrlRequest(BaseModel):
     """Request model for file URL ingestion."""
     file_url: HttpUrl
-    filename: str
     metadata: DocumentMetadata
 
 class BatchFileRequest(BaseModel):
     """Request model for batch file ingestion."""
     file_url: HttpUrl
-    filename: str
     metadata: DocumentMetadata
 
 
@@ -58,11 +56,11 @@ async def ingest_file_url(request: FileUrlRequest) -> DocumentResponse:
 
     if document_type is None:
         # Infer document type from filename
-        if request.filename.endswith(".pdf"):
+        if request.metadata.source.endswith(".pdf"):
             document_type = DocumentType.PDF
-        elif request.filename.endswith(".md"):
+        elif request.metadata.source.endswith(".md"):
             document_type = DocumentType.MARKDOWN
-        elif request.filename.endswith(".txt"):
+        elif request.metadata.source.endswith(".txt"):
             document_type = DocumentType.TEXT
         else:
             raise HTTPException(
@@ -73,7 +71,7 @@ async def ingest_file_url(request: FileUrlRequest) -> DocumentResponse:
     try:
         chunks = await document_processor.process_file_from_url(
             str(request.file_url),
-            request.filename,
+            request.metadata.source,
             document_type
         )
         await document_processor.ingest_documents(chunks)
@@ -81,7 +79,7 @@ async def ingest_file_url(request: FileUrlRequest) -> DocumentResponse:
         return DocumentResponse(
             id=str(uuid.uuid4()),
             status="success",
-            message=f"Successfully processed and ingested file: {request.filename}"
+            message=f"Successfully processed and ingested file: {request.metadata.source}"
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -1,3 +1,4 @@
+from datetime import datetime
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -65,7 +66,9 @@ class DocumentProcessor:
                     metadata = DocumentMetadata(
                         source=filename,
                         document_type=document_type,
-                        page_number=doc.metadata.get("page") if "page" in doc.metadata else None
+                        author=doc.metadata.get("author") if "author" in doc.metadata else "",
+                        created_at=doc.metadata.get("created_at") if "created_at" in doc.metadata else datetime.now().isoformat(),
+                        page_number=doc.metadata.get("page") if "page" in doc.metadata else 1
                     )
                     chunks = await self.process_text(doc.page_content, metadata)
                     processed_docs.extend(chunks)
